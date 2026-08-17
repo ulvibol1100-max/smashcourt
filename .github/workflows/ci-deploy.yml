@@ -7,6 +7,13 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
 
     steps:
       - name: Checkout
@@ -25,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Run Prisma migrations (if DATABASE_URL provided)
-        if: ${{ secrets.DATABASE_URL }}
+        if: ${{ env.DATABASE_URL != '' }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
@@ -33,7 +40,7 @@ jobs:
           npx prisma migrate deploy --schema=prisma/schema.prisma
 
       - name: Deploy to Vercel
-        if: ${{ secrets.VERCEL_TOKEN && secrets.VERCEL_ORG_ID && secrets.VERCEL_PROJECT_ID }}
+        if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != '' }}
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -45,7 +52,7 @@ jobs:
           vercel-args: "--prod"
 
       - name: Trigger Render deploy (if configured)
-        if: ${{ secrets.RENDER_API_KEY && secrets.RENDER_SERVICE_ID }}
+        if: ${{ env.RENDER_API_KEY != '' && env.RENDER_SERVICE_ID != '' }}
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}

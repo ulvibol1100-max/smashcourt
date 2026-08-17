@@ -29,6 +29,11 @@ jobs:
         run: npm ci
 
       - name: Build (workspaces)
+        # Prisma validates the URL while generating its client, but does not
+        # connect during this build. A placeholder keeps CI independent of
+        # deployment secrets; migrations use the real DATABASE_URL below.
+        env:
+          DATABASE_URL: postgresql://build:build@localhost:5432/smashcourt
         run: npm run build
 
       - name: Run Prisma migrations (if DATABASE_URL provided)

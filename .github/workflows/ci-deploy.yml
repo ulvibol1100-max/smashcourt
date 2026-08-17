@@ -39,7 +39,9 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: .
+          # The Vercel project is the Vite application, not the monorepo root.
+          # This picks up apps/web/vercel.json, including the SPA fallback rule.
+          working-directory: apps/web
           vercel-args: "--prod"
 
       - name: Trigger Render deploy (if configured)
